@@ -19,5 +19,7 @@ connectDB();
 
 app.use("/api/auth", authRoutes); // Use Authentication Routes
 app.use("/api/users", userRoutes); // Use User Routes
+app.use("/api/tasks", require("./routes/taskRoutes"));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
