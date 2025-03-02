@@ -7,35 +7,56 @@ exports.registerUser = async (req, res) => {
     const { email, name, role, status, phoneNumber } = req.body;
     const token = req.headers.authorization?.split(" ")[1] || req.body.token;
 
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized - Token missing" });
+    }
+
+    console.log("Received Token:", token);
+
     // Verify Firebase Token
     const decodedToken = await admin.auth().verifyIdToken(token);
-    if (!decodedToken)
+    if (!decodedToken) {
       return res.status(401).json({ message: "Unauthorized - Invalid token" });
+    }
+
+    console.log("Decoded Token:", decodedToken);
+
+    const { uid } = decodedToken;
+    console.log("UID:", uid);
+
+    if (!uid) {
+      return res.status(400).json({ message: "UID is missing in the token." });
+    }
+
+    console.log("Saving to MongoDB...");
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
-    if (existingUser)
+    if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
+    }
 
-    // Save to MongoDB
+    // Create a new user in MongoDB
     const newUser = new User({
-      firebaseId: decodedToken.uid,
+      firebaseUID: uid, // Ensure UID is included
       email,
       name,
-      phoneNumber,
       role,
       status,
+      phoneNumber,
     });
 
     await newUser.save();
+
+    console.log("User registered successfully!");
     res
       .status(201)
       .json({ message: "User registered successfully!", user: newUser });
   } catch (error) {
+    console.error("Server Error:", error);
     res.status(500).json({ message: error.message });
   }
 };
-
 exports.loginUser = async (req, res) => {
   const { firebaseToken } = req.body;
 
