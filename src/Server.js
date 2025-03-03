@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const userRoutes = require("./Routes/userRoutes");
 const authRoutes = require("./Routes/authRoutes");
+const taskRoutes = require("./Routes/taskRoutes");
 const connectDB = require("./Config/db");
 
 const app = express();
@@ -19,7 +20,7 @@ connectDB();
 
 app.use("/api/auth", authRoutes); // Use Authentication Routes
 app.use("/api/users", userRoutes); // Use User Routes
-app.use("/api/tasks", require("./routes/taskRoutes"));
+app.use("/api/tasks", taskRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
