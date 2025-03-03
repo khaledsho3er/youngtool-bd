@@ -1,17 +1,17 @@
 const jwt = require("jsonwebtoken");
 
-exports.authMiddleware = (req, res, next) => {
-  const token = req.header("Authorization");
+exports.authenticateUser = (req, res, next) => {
+  const token = req.cookies.session;
 
   if (!token) {
-    return res.status(401).json({ error: "No token, authorization denied" });
+    return res.status(401).json({ error: "Unauthorized - No session found" });
   }
 
   try {
     const decoded = jwt.verify(token, "secretKey");
-    req.user = decoded;
+    req.user = decoded; // Attach user info to request
     next();
   } catch (error) {
-    res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ error: "Unauthorized - Invalid session" });
   }
 };

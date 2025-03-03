@@ -58,11 +58,15 @@ exports.registerUser = async (req, res) => {
   }
 };
 exports.loginUser = async (req, res) => {
-  const { firebaseToken } = req.body;
+  const token = req.headers.authorization?.split(" ")[1]; // Get token from headers
+
+  if (!token) {
+    return res.status(401).json({ error: "Token is missing" });
+  }
 
   try {
     // Verify Firebase token
-    const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
+    const decodedToken = await admin.auth().verifyIdToken(token);
     const firebaseUID = decodedToken.uid;
 
     // Find user in MongoDB
@@ -73,12 +77,47 @@ exports.loginUser = async (req, res) => {
     }
 
     // Generate JWT for backend authentication
-    const token = jwt.sign({ uid: firebaseUID, role: user.role }, "secretKey", {
-      expiresIn: "1h",
-    });
+    const jwtToken = jwt.sign(
+      { uid: firebaseUID, role: user.role },
+      "secretKey",
+      {
+        expiresIn: "1h",
+      }
+    );
 
-    res.json({ token, role: user.role });
+    res.json({ token: jwtToken, role: user.role });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+// Controller for checking user session
+exports.checkSession = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized - Token missing" });
+    }
+
+    // Verify Firebase Token
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    const firebaseUID = decodedToken.uid;
+
+    // Find user in MongoDB
+    const user = await User.findOne({ firebaseUID });
+
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+
+    res.json({ user }); // Send user data to frontend
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.logoutUser = (req, res) => {
+  res.clearCookie("session");
+  res.json({ message: "Logged out successfully" });
 };
