@@ -11,7 +11,7 @@ const TaskSchema = new mongoose.Schema(
     },
     assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    assignedClient: { type: mongoose.Schema.Types.ObjectId, ref: "client" },
+    assignedClient: { type: mongoose.Schema.Types.ObjectId, ref: "Client" },
     startDate: { type: Date, required: true },
     dueDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
