@@ -90,8 +90,6 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-// Controller for checking user session
 exports.checkSession = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -121,3 +119,13 @@ exports.logoutUser = (req, res) => {
   res.clearCookie("session");
   res.json({ message: "Logged out successfully" });
 };
+    exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-__v"); // Exclude `__v` field
+    res.status(200).json(users);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

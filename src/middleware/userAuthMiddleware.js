@@ -15,3 +15,10 @@ exports.authenticateUser = (req, res, next) => {
     res.status(401).json({ error: "Unauthorized - Invalid session" });
   }
 };
+exports.isManagerOrAdmin = (req, res, next) => {
+  if (req.user.role === "Admin" || req.user.role === "Account Manager") {
+    next();
+  } else {
+    res.status(403).json({ message: "Forbidden: Only Admins or Managers can assign tasks" });
+  }
+};
